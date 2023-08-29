@@ -1,0 +1,384 @@
+
+--Spare Part Management
+
+
+---Down Script
+
+
+--FOREIGN Key
+
+
+--employee
+if exists (select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+    where CONSTRAINT_NAME ='FK_Employee_Department_name')
+    alter table Employee drop CONSTRAINT FK_Employee_Department_name
+--part
+if exists (select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+    where CONSTRAINT_NAME ='FK_Part_Distributor_id')
+    alter table Part drop CONSTRAINT FK_Part_Distributor_id
+
+if exists (select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+    where CONSTRAINT_NAME ='FK_Part_Inventory_id')
+    alter table Part drop CONSTRAINT FK_Part_Inventory_id
+
+--Plant
+if exists (select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+    where CONSTRAINT_NAME ='FK_Plant_Inventory_id')
+    alter table Plant drop CONSTRAINT FK_Plant_Inventory_id
+
+--Car
+if exists (select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+    where CONSTRAINT_NAME ='FK_Car_Plant_id')
+    alter table Car drop CONSTRAINT FK_Car_Plant_id
+
+--Invoice
+if exists (select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+    where CONSTRAINT_NAME ='FK_Invoice_Department_id')
+    alter table Invoice drop CONSTRAINT FK_Invoice_Department_id
+
+if exists (select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+    where CONSTRAINT_NAME ='FK_Invoice_Distributor_id')
+    alter table Invoice drop CONSTRAINT FK_Invoice_Distributor_id
+
+
+--Unique Key
+if exists (select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+    where CONSTRAINT_NAME ='U_Distributor_Distributor_email')
+    alter table Distributor drop CONSTRAINT U_Distributor_Distributor_email
+
+if exists (select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+    where CONSTRAINT_NAME ='U_Department_Department_name')
+    alter table Department drop CONSTRAINT U_Department_Department_name
+
+
+--TABLE
+if exists(select * from sys.objects where name='Inventory')
+	drop table Inventory
+if exists(select * from sys.objects where name='Distributor')
+	drop table Distributor
+if exists(select * from sys.objects where name='Department')
+    drop table Department
+if exists(select * from sys.objects where name='Employee')
+	drop table Employee
+if exists(select * from sys.objects where name='Part')
+	drop table Part
+if exists(select * from sys.objects where name='Plant')
+	drop table Plant
+if exists(select * from sys.objects where name='Car')
+	drop table Car
+if exists(select * from sys.objects where name='Invoice')
+	drop table Invoice
+if exists(select * from sys.objects where name='Table_Directory')
+	drop table Table_Directory
+GO
+
+-- UP Metadata
+
+CREATE TABLE [dbo].[Inventory](
+    [Inventory_id] [Varchar](10) NOT NULL,
+    [Inventory_Sector] [varchar](50) NOT NULL,
+    [Inventory_Capacity] [int] NOT NULL,
+    [Inventory_Location] [varchar](100) NOT NULL,
+    [Inventory_Status] [varchar](60) NOT NULL,
+
+ CONSTRAINT [PK_Inventory_Inventory_id] PRIMARY KEY ([Inventory_id])
+)
+
+CREATE TABLE [dbo].[Distributor](
+	[Distributor_id] [Varchar](10) NOT NULL,
+    [Distributor_Name] [varchar](50) NOT NULL,
+    [Distributor_Location] [varchar](100) NOT NULL,
+    [Distributor_email] [varchar](60) NULL,
+
+ CONSTRAINT [PK_Distributor_Distributor_id] PRIMARY KEY ([Distributor_id]),
+)
+
+CREATE TABLE [dbo].[Department](
+    [Department_id] [int] NOT NULL,
+    [Department_name] [varchar](50) NOT NULL,
+
+CONSTRAINT [PK_Department_Department_id] PRIMARY KEY ([Department_id]),
+CONSTRAINT [U_Department_Department_name] UNIQUE ([Department_name])
+)
+
+CREATE TABLE [dbo].[Employee](
+    [Employee_id] [int] NOT NULL,
+    [Employee_Name] [varchar](50) NOT NULL,
+    [Employee_Role] [varchar](50) NOT NULL,
+    [Employee_Department] [varchar](50) NOT NULL,
+
+CONSTRAINT [PK_Employee_Employee_id] PRIMARY KEY ([Employee_id]),
+CONSTRAINT [FK_Employee_Department_name] FOREIGN KEY (Employee_Department) REFERENCES Department(Department_name)
+)
+
+CREATE TABLE [dbo].[Part](
+	[Part_id] [varchar](12) NOT NULL,
+    [Part_Name] [varchar](50) NOT NULL,
+    [Part_Category] [varchar](50) NOT NULL,
+    [Part_rate] [money] NOT NULL,
+    [Distributed_By] [varchar](10) NOT NULL,
+    [Stored_In] [varchar](10) NOT NULL,
+
+ CONSTRAINT [PK_Part_Part_id] PRIMARY KEY ([Part_id]),
+ CONSTRAINT [FK_Part_Inventory_id] FOREIGN KEY (Stored_In) REFERENCES Inventory(Inventory_id),
+ CONSTRAINT [FK_Part_Distributor_id] FOREIGN KEY (Distributed_by) REFERENCES Distributor(Distributor_id)
+)
+
+
+CREATE TABLE [dbo].[Plant](
+    [Plant_id] [Varchar](10) NOT NULL,
+    [Plant_Name] [varchar](100) NOT NULL,
+    [Plant_Location] [Varchar](100) NOT NULL,
+    [plantInventory_id] [Varchar](10) NOT NULL,
+
+CONSTRAINT [PK_Plant_Plant_id] PRIMARY KEY ([Plant_id]),
+CONSTRAINT [FK_Plant_Inventory_id] FOREIGN KEY (plantInventory_id) REFERENCES Inventory(Inventory_id)
+
+)
+
+CREATE TABLE [dbo].[Car](
+    [Car_id] [int] NOT NULL,
+    [Car_name] [varchar](50) NOT NULL,
+    [Car_Model_Name] [varchar](50) NOT NULL,
+    [Car_Type] [varchar](50) NULL,
+    [Car_Plant] [Varchar](10) NOT NULL,
+
+CONSTRAINT [PK_Car_Car_id] PRIMARY KEY ([Car_id]),
+CONSTRAINT [FK_Car_Plant_id] FOREIGN KEY (Car_Plant) REFERENCES Plant(Plant_id)
+)
+
+CREATE TABLE [dbo].[Invoice](
+    [Invoice_id] [varchar] (50) NOT NULL,
+    [Invoice_Description] [varchar](50) NOT NULL,
+    [Invoice_Createdby] [varchar](50) NOT NULL,
+    [Invoiced_To] [Varchar](10) NOT NULL,
+    [Invoice_Date] [Varchar](10) NOT NULL,
+    [Invoice_Total_Units] [int] NOT NULL,
+    [Invoice_TotalAmount] [money] NOT NULL,
+    [Invoice_Payment_Status] [varchar](60) NOT NULL,
+    [Invoice_part] [int] NOT NULL
+    
+
+CONSTRAINT [PK_Invoice_Invoice_id] PRIMARY KEY ([Invoice_id]),
+CONSTRAINT [FK_Invoice_Distributor_id] FOREIGN KEY (Invoiced_To) REFERENCES Distributor(Distributor_id),
+CONSTRAINT [FK_Invoice_Department_id] FOREIGN KEY (Invoice_Createdby) REFERENCES Department(Department_name)
+ )
+
+
+create table [dbo].[Table_Directory](
+    [Table_name] [varchar] (100) NOT NULL
+)
+
+GO
+ alter table Distributor add constraint U_Distributor_Distributor_email unique (Distributor_email)
+
+GO
+
+
+-- Up Data
+--Insert Values
+--Insert into Inventory tbl
+
+
+insert into Inventory 
+    (Inventory_id,Inventory_Sector, Inventory_Capacity, Inventory_Location, Inventory_Status) 
+    VALUES
+    ('IR905644FR','Large Scale',10000000,'Meyzieu, France','Active'),
+    ('IR236783IN','Large Scale',5000000,'Chennai, India','Active'),
+    ('IR902341SK','Small Scale',645000,'Busan, South Korea','Active'),
+    ('IR768934CH','Small Scale',490000,'Los Andes, Chile','Partially Active'),
+    ('IR747891TU','Large Scale',9900000,'Istanbul, Turkey','Inactive'),
+    ('IN361134JA','Large Scale',9000000,'Fukuoka, Japan','Active'),
+    ('IN111676EG','Small Scale',700046,'Giza, Egypt','Inactive'),
+    ('IN843746SA','Large Scale',9700000,'Pretoria, South Africa','Active'),
+    ('IN256903US','Large Scale',8000670,'Missisippi, USA','Active')
+
+
+--Insert Into Distributor
+insert into Distributor 
+    (Distributor_id,Distributor_Name, Distributor_Location, Distributor_email) 
+    VALUES
+    ('D7639927RC','AMA Spare Parts','India','amasp@sp.com'),
+    ('D5372687GB','Dub Auto Parts','South Korea','dubs@db.com'),
+    ('D0819389KL','Honeywell International Inc','USA','contacthoney@honeywell.com'),
+    ('D9173868YS','Denso Corporation','Japan', 'densohelp@den.com'),
+    ('D2543398LQ','Bridgestone Corporation','Japan','bridgestoencorp@bsc.com'),
+    ('D0943628NS','Ingersol-Rand PLC','Ireland','irlp@inger.com'),
+    ('D6125373HA','Continental AG','Germany','contiag@cag.com'),
+    ('D2748238WI','Autozone Inc','USA','autoinc@ainc.com'),
+    ('D4322687EO','Paccar Inc','USA','pacinc@prc.com'),
+    ('D3469898IH','Aptiv Inc','Ireland','apinc@ai.com'),
+    ('D1225663DE','Michelin','France','mich@mh.com'),
+    ('D9625154FG','DSM KON','Netherlands','dsmkonparts@dk.com'),
+    ('D3124317PC','Copart Inc','USA','coparts@coinc.com'),
+    ('D8763546VK','Magna International Inc','Canada','magnaint@mgin.com'),
+    ('D2376838NA','Carmax Inc','USA','carinc@cc.com'),
+    ('D5208297MF','Melrose Industires','UK','melroseind@mrse.com'),
+    ('D0356243BQ','GENUINE PARTS COMPANY','USA','genuinepartscomp@comp.com')
+
+
+insert into Department
+    (Department_id, Department_name)
+    VALUES
+    (789674, 'CHASIS'),
+    (832792, 'Electrical'),
+    (736468, 'Brake & Suspension'),
+    (972947, 'Design')
+
+
+insert into Employee
+    (Employee_id,Employee_Name,Employee_Role,Employee_Department)
+    VALUES
+    (04545,'Abigail Mejia','Quality Engineer','CHASIS'),
+    (00154, 'Wyatt Chin', 'Engineering Manager','Design'),
+    (03343, 'Dylan Choi', 'Engineer','Brake & Suspension'),
+    (02594,'Angel Powell', 'Senior Manager','Electrical'),
+    (04152,'Kennedy Foster', 'Engineer', 'Brake & Suspension'),
+    (00586, 'Sadie Washington', 'Engineer', 'Electrical'),
+    (03830, 'Lucy Alexander', 'Engineer','Design'),
+    (02139, 'Piper Lewis', 'Engineer', 'Design'),
+    (04600, 'Gabriel Holmes', 'Controls Engineer', 'Electrical'),
+    (03574, 'Riley Padilla', 'Engineer','CHASIS'),
+    (02862, 'John Chow', 'Manager','CHASIS'),
+    (04917, 'William Vu','Manager','Electrical'),
+    (00716,'John Moore','Manager','Brake & Suspension'),
+    (01848,'Nora Brown','Manager','Design')
+
+
+insert into Part
+    (Part_id,Part_Name, Part_Category,Part_rate,Distributed_By,Stored_In)
+    VALUES
+    (947265134,'screw','general',23,'D7639927RC','IR902341SK'),
+    (774985771,'bolt','general',11,'D0943628NS','IN111676EG'),
+    (417918370,'oil filters','service',19,'D4322687EO','IN111676EG'),
+    (464222415,'timing belt','engine',20,'D2748238WI','IR902341SK'),
+    (824344560,'tires','service',65,'D0356243BQ','IN361134JA'),
+    (730797840,'water pump','engine',24,'D3124317PC','IN843746SA'),
+    (799700093,'battery','operations',35,'D6125373HA','IN256903US'),
+    (569578131,'head lamps','operations',5,'D9173868YS','IN361134JA'),
+    (855667655,'jump starters','operations',12,'D5372687GB','IR747891TU'),
+    (631908355,'seat covers','interior',19,'D9625154FG','IR905644FR') 
+
+
+insert into Plant
+    (Plant_id, Plant_Name,Plant_Location, plantInventory_id)
+    VALUES
+    (74348995,'RN Alliance Plant', 'India', 'IR236783IN'),
+    (55536824,'Renault Plant', 'France','IR905644FR'),
+    (80629204, 'Nissan Plant', 'Japan','IN361134JA'),
+    (62738192, 'Nissan North America Corporation Plant', 'USA','IN111676EG'),
+    (34472255,'Mitsubishi Plant','South Korea', 'IR902341SK'),
+    (87469346,'Dacia Manufacturing Plant' ,'UAE', 'IR747891TU'),
+    (63965853,'Infinity Plant','Brazil','IR768934CH')
+
+insert into Car
+    ( Car_id, Car_name, Car_Model_Name, Car_Type, Car_Plant)
+    VALUES
+     (100,'Kwid','Renault','suv',74348995),
+    (101,'Triber','Renault','sedan',62738192),
+    (102,'Duster','Renault','coupe',55536824),
+    (103,'Kiger','Renault','suv',55536824),
+    (104,'Altima','Nissan','sedan',63965853),
+    (105,'leaf','Nissan','sedan',62738192),
+    (106,'X-Trail','Nissan','suv',34472255),
+    (107,'Pajero','Mitsubishi','coupe',87469346)
+
+insert into Invoice
+    (Invoice_id,Invoice_Description, Invoiced_To,Invoice_Createdby, Invoice_Date,Invoice_Total_Units,Invoice_TotalAmount,Invoice_Payment_Status,Invoice_part)
+    VALUES
+    ('PID394812012022','generated for screws purchased','D7639927RC','CHASIS','02/11/2019',45,1035,'Paid',947265134),
+    ('PID265612012022','bolt kits bought for screws','D4322687EO','Brake & Suspension','02/23/2019',20,220,'Paid',774985771),
+    ('PID301812012022','new oil filters, car servicing, part replacement','D9625154FG','Electrical','06/05/2020',60,1140,'Pending',417918370),
+    ('PID388612012022','rubber belt replacement in engines','D2543398LQ','CHASIS','08/20/2021',10,200,'Paid',464222415),
+    ('PID117312012022','high quality tires bought','D6125373HA','Brake & Suspension','04/13/2022',100,6500,'Paid',824344560),
+    ('PID394512012022','for engine coolant','D0819389KL','CHASIS','01/14/2021',50,1200,'Pending',730797840),
+    ('PID181512012022','batteries','D3469898IH','Design','03/14/2021',30,1050,'Paid',799700093),
+    ('PID427712012022','filament replacments','D8763546VK','Electrical','06/15/2022',100,500,'Paid',569578131),
+    ('PID175212012022','jump starters billing','D0943628NS','Design','10/17/2020',25,300,'Pending',855667655),
+    ('PID441612012022','leather seat covers','D5372687GB','Electrical','12/22/2022',75,1425,'Paid',631908355)
+
+
+
+insert into Table_Directory 
+    (Table_name) 
+    VALUES
+    ('Inventory'),
+    ('Distributor'),
+    ('Department'),
+    ('Employee'),
+    ('Part'),
+    ('Plant'),
+    ('Car'),
+    ('Invoice')
+
+
+
+select * from Table_Directory
+select * from Car
+
+--how many distributors ditributed more than 50 units?
+
+select Distributor_Name from Distributor as dis inner join Invoice as inv on dis.Distributor_id = inv.Invoiced_To where inv.Invoice_Total_Units > 50
+
+
+--total cost of engine parts ordered in year 2021
+select SUM(Invoice_TotalAmount) as 'Total Engine Parts Ordered' from Invoice where Invoice_Date like '%2021' AND Invoice_Description like '%engine%'
+
+--which plant is highest consumer of large scale inventories
+
+Select Plant_Name as 'plant' from plant as pl inner join Inventory as inv on inv.Inventory_id = pl.plantInventory_id where inv.Inventory_Sector = 'Large Scale'
+
+--which dept has highest part expenditure
+
+SELECT Invoice_Createdby as 'Department', MAX(Invoice_TotalAmount) AS max_items
+FROM Invoice
+GROUP BY Invoice_Createdby
+
+---which distributor shares same inventory space
+
+Select Distributor_Name from Distributor where Distributor_id in(
+select Distributed_By
+from Part
+join
+(
+  select Stored_In
+  from Part
+  group by Stored_In
+  having count(distinct Part_id) > 1
+) tokens on tokens.Stored_In = Part.Stored_In)
+
+
+---
+
+SELECT Invoiced_To , Paid ,Pending
+FROM Invoice 
+PIVOT 
+( 
+SUM(Invoice_TotalAmount) FOR Invoice_Payment_Status IN (Paid, Pending ) 
+) AS PivotTable
+
+----
+
+drop procedure if exists p_upsert_employee
+GO
+create procedure 
+    p_upsert_employee (
+    @Employee_id INT,
+    @Employee_Name VARCHAR (50),
+    @Employee_Role VARCHAR(50),
+    @Employee_Department VARCHAR (50)
+    ) as 
+begin
+    if (select count(*) from Employee where Employee_id = @Employee_id) > 0 
+        begin 
+            update Employee  set Employee_Department = @Employee_Department  
+            where Employee_id = @Employee_id;
+        end
+    else 
+        begin
+            insert into Employee (Employee_id,Employee_Name,Employee_Role,Employee_Department) 
+            values (@Employee_id,@Employee_Name,@Employee_Role, @Employee_Department)
+        end
+end
+exec dbo.p_upsert_employee 90628,'Abigail Cooper','Senior Manager','CHASIS'
+
