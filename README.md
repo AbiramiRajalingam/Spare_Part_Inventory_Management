@@ -1,6 +1,7 @@
 # Spare_Part_Inventory_Management
 spare parts database streamlines inventory management, ensuring parts availability and secure data handling. It simplifies tracking, and order placement, and maintains records, enhancing efficiency and reducing errors in the motor car industry.
 
+
 **Business Description**
 There are numerous functional components to consider when it comes to motor cars that combine to form something you can use. Due to the complexity of each of these components, they might all work properly or improperly and have an impact on the overall performance of the cars. Each and every component is important since without even one, the entire vehicle might not function. Additionally, properly controlling the inventory of auto components might be a little expensive, which can be stressful and provide a lot of potential for error. The main idea of the project is to create a database for spare parts administration to manage records of the Spare Parts, Distributors, Billing, Engineering Teams, Warehouse and Vehicles situated in various regions, locations, with varied pricing allowing the working teams to place order, manage orders and store parts based on their needs.
 Creating such a system will be helpful in the following ways:
@@ -10,6 +11,7 @@ Creating such a system will be helpful in the following ways:
 • Since there would be no more manual entry and would be maintained by only one department it would ensure data security
 • This will also allow us to maintain the history of all parts and distributors
 For project/demo purposes we shall assume that all parts are readily available, and the inventory has certain stocks in it. Along with all active contracts with the distributors.
+
 **Problem Statement**
 A machine's broken part can be swapped out for a functional one using an automotive spare part. It is often kept as an inventory that may be utilized for upgrades or replacements on a variety of car parts.
 Today all the parts information exists in the form of paper registered records as the industry is small-scale and manages to handle inputs in naïve methods and attempt to save costs. Searching, and managing these reports is difficult as the paper records must be stored carefully and to search for one part the employees must go through all records. This is not feasible in all cases as it’s a very tedious process to keep track of daily transactive data Also it is prone to data loss, and insecurity.
